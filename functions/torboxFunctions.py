@@ -7,6 +7,7 @@ from functions.mediaFunctions import constructSeriesTitle, cleanTitle, cleanYear
 from functions.databaseFunctions import insertData
 import os
 import logging
+import traceback
 
 class DownloadType(Enum):
     torrent = "torrents"
@@ -118,7 +119,7 @@ def searchMetadata(query: str, title_data: dict, file_name: str, full_title: str
 
         title = cleanTitle(data.get("title"))
         base_metadata["metadata_title"] = title
-        base_metadata["metadata_years"] = cleanYear(title_data.get("year", None) or data.get("releaseYears"))
+        base_metadata["metadata_years"] = cleanYear(title_data.get("year", None) or data.get("releaseYears", None))
 
         if data.get("type") == "anime" or data.get("type") == "series":
             series_season_episode = constructSeriesTitle(season=title_data.get("season", None), episode=title_data.get("episode", None))
@@ -143,6 +144,7 @@ def searchMetadata(query: str, title_data: dict, file_name: str, full_title: str
         return base_metadata, False, "No metadata found."
     except Exception as e:
         logging.error(f"Error searching metadata: {e}")
+        logging.error(f"Error searching metadata: {traceback.format_exc()}")
         return base_metadata, False, f"Error searching metadata: {e}"
 
 def getDownloadLink(url: str):
