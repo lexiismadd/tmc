@@ -142,6 +142,8 @@ def searchMetadata(query: str, title_data: dict, file_name: str, full_title: str
         return base_metadata, True, "Metadata found."
     except IndexError:
         return base_metadata, False, "No metadata found."
+    except httpx.TimeoutException:
+        return base_metadata, False, "Timeout searching metadata."
     except Exception as e:
         logging.error(f"Error searching metadata: {e}")
         logging.error(f"Error searching metadata: {traceback.format_exc()}")
