@@ -8,6 +8,8 @@ from functions.databaseFunctions import insertData
 import os
 import logging
 import traceback
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import multiprocessing
 
 class DownloadType(Enum):
     torrent = "torrents"
@@ -24,8 +26,37 @@ ACCEPTABLE_MIME_TYPES = [
     "video/mp4",
 ]
 
-def getUserDownloads(type: DownloadType):
+def process_file(item, file, type):
+    """Process a single file and return the processed data"""
+    if not file.get("mimetype").startswith("video/") or file.get("mimetype") not in ACCEPTABLE_MIME_TYPES:
+        logging.debug(f"Skipping file {file.get('short_name')} with mimetype {file.get('mimetype')}")
+        return None
+    
+    data = {
+        "item_id": item.get("id"),
+        "type": type.value,
+        "folder_name": item.get("name"),
+        "folder_hash": item.get("hash"),
+        "file_id": file.get("id"),
+        "file_name": file.get("short_name"),
+        "file_size": file.get("size"),
+        "file_mimetype": file.get("mimetype"),
+        "path": file.get("name"),
+        "download_link": f"https://api.torbox.app/v1/api/{type.value}/requestdl?token={TORBOX_API_KEY}&{IDType[type.value].value}={item.get('id')}&file_id={file.get('id')}&redirect=true",
+        "extension": os.path.splitext(file.get("short_name"))[-1],              
+    }
+    title_data = PTN.parse(file.get("short_name"))
 
+    if item.get("name") == item.get("hash"):
+        item["name"] = title_data.get("title", file.get("short_name"))
+
+    metadata, _, _ = searchMetadata(title_data.get("title", file.get("short_name")), title_data, file.get("short_name"), f"{item.get('name')} {file.get('short_name')}")
+    data.update(metadata)
+    logging.debug(data)
+    insertData(data, type.value)
+    return data
+
+def getUserDownloads(type: DownloadType):
     offset = 0
     limit = 1000
 
@@ -59,36 +90,36 @@ def getUserDownloads(type: DownloadType):
     
     files = []
     
+    # Get the number of CPU cores for parallel processing
+    max_workers = int(multiprocessing.cpu_count() * 2 - 1)
+    logging.info(f"Processing files with {max_workers} parallel threads")
+    
+    # Collect all files to process
+    files_to_process = []
     for item in file_data:
         if not item.get("cached", False):
             continue
         for file in item.get("files", []):
-            if not file.get("mimetype").startswith("video/") or file.get("mimetype") not in ACCEPTABLE_MIME_TYPES:
-                logging.debug(f"Skipping file {file.get('short_name')} with mimetype {file.get('mimetype')}")
-                continue
-            data = {
-                "item_id": item.get("id"),
-                "type": type.value,
-                "folder_name": item.get("name"),
-                "folder_hash": item.get("hash"),
-                "file_id": file.get("id"),
-                "file_name": file.get("short_name"),
-                "file_size": file.get("size"),
-                "file_mimetype": file.get("mimetype"),
-                "path": file.get("name"),
-                "download_link": f"https://api.torbox.app/v1/api/{type.value}/requestdl?token={TORBOX_API_KEY}&{IDType[type.value].value}={item.get('id')}&file_id={file.get('id')}&redirect=true",
-                "extension": os.path.splitext(file.get("short_name"))[-1],              
-            }
-            title_data = PTN.parse(file.get("short_name"))
-
-            if item.get("name") == item.get("hash"):
-                item["name"] = title_data.get("title", file.get("short_name"))
-
-            metadata, _, _ = searchMetadata(title_data.get("title", file.get("short_name")), title_data, file.get("short_name"), f"{item.get('name')} {file.get('short_name')}")
-            data.update(metadata)
-            files.append(data)
-            logging.debug(data)
-            insertData(data, type.value)
+            files_to_process.append((item, file))
+    
+    # Process files in parallel
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # Submit all tasks
+        future_to_file = {
+            executor.submit(process_file, item, file, type): (item, file) 
+            for item, file in files_to_process
+        }
+        
+        # Collect results as they complete
+        for future in as_completed(future_to_file):
+            try:
+                data = future.result()
+                if data:
+                    files.append(data)
+            except Exception as e:
+                item, file = future_to_file[future]
+                logging.error(f"Error processing file {file.get('short_name', 'unknown')}: {e}")
+                logging.error(traceback.format_exc())
             
     return files, True, f"{type.value.capitalize()} fetched successfully."
 
