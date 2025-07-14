@@ -3,6 +3,7 @@ import httpx
 from enum import Enum
 import PTN
 from library.torbox import TORBOX_API_KEY
+from library.filesystem import MOUNT_PATH, SYMLINK_PATH
 from functions.mediaFunctions import constructSeriesTitle, cleanTitle, cleanYear
 from functions.databaseFunctions import insertData
 import os
@@ -52,7 +53,7 @@ def process_file(item, file, type):
 
     metadata, _, _ = searchMetadata(title_data.get("title", file.get("short_name")), title_data, file.get("short_name"), f"{item.get('name')} {file.get('short_name')}")
     data.update(metadata)
-    logging.debug(data)
+    logging.debug(f"Processing data {data}")
     insertData(data, type.value)
     return data
 
@@ -114,8 +115,17 @@ def getUserDownloads(type: DownloadType):
         for future in as_completed(future_to_file):
             try:
                 data = future.result()
+                logging.debug(f"Future result data: {data}")
                 if data:
                     files.append(data)
+                    if data.get('metadata_mediatype') == 'movie':
+                        path_tail = f"movie/{data.get('metadata_rootfoldername')}/{data.get('metadata_filename')}"
+                    else:
+                        path_tail = f"series/{data.get('metadata_rootfoldername')}/{data.get('metadata_foldername')}/{data.get('metadata_filename')}"
+                        
+                    v_path = f"{MOUNT_PATH}/{path_tail}"
+                    s_path = f"{SYMLINK_PATH}/{path_tail}"
+                    create_symlink_in_symlink_path(v_path, s_path)
             except Exception as e:
                 item, file = future_to_file[future]
                 logging.error(f"Error processing file {file.get('short_name', 'unknown')}: {e}")
@@ -200,3 +210,14 @@ def downloadFile(url: str, size: int, offset: int = 0):
         logging.error(f"Error downloading file: {response.status_code}")
         raise Exception(f"Error downloading file: {response.status_code}")
     
+
+
+def create_symlink_in_symlink_path(vfs_path, symlink_path):
+    # vfs_path: the path inside the FUSE mount (e.g., /mnt/torbox_media/movies/Foo (2024)/Foo (2024).mkv)
+    # symlink_path: the desired symlink location (e.g., /home/youruser/symlinks/Foo (2024).mkv)
+    try:
+        if os.path.exists(symlink_path) or os.path.islink(symlink_path):
+            os.remove(symlink_path)
+        os.symlink(vfs_path, symlink_path)
+    except Exception as e:
+        logging.error(f"Error creating symlink: {e}")
