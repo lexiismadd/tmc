@@ -202,14 +202,3 @@ def downloadFile(url: str, size: int, offset: int = 0):
         logging.error(f"Error downloading file: {response.status_code}")
         raise Exception(f"Error downloading file: {response.status_code}")
     
-
-
-def create_symlink_in_symlink_path(vfs_path, symlink_path):
-    # vfs_path: the path inside the FUSE mount (e.g., /mnt/torbox_media/movies/Foo (2024)/Foo (2024).mkv)
-    # symlink_path: the desired symlink location (e.g., /home/youruser/symlinks/Foo (2024).mkv)
-    try:
-        if os.path.exists(symlink_path) or os.path.islink(symlink_path):
-            os.remove(symlink_path)
-        os.symlink(vfs_path, symlink_path)
-    except Exception as e:
-        logging.error(f"Error creating symlink: {e}")
