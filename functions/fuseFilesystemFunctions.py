@@ -74,11 +74,9 @@ class VirtualFileSystem:
             if f.get('metadata_mediatype') == 'movie':
                 path = f'/movies/{f.get("metadata_rootfoldername")}/{f.get("metadata_filename")}'
                 file_map[path] = f
-                # self.create_symlink_in_symlink_path(path,SYMLINK_PATH)
             else:  # series
                 path = f'/series/{f.get("metadata_rootfoldername")}/{f.get("metadata_foldername")}/{f.get("metadata_filename")}'
                 file_map[path] = f
-                # self.create_symlink_in_symlink_path(path,SYMLINK_PATH)
                 
         return file_map
 
@@ -133,16 +131,16 @@ class TorBoxMediaCenterFuse(Fuse):
                 self.files = files
                 self.vfs = VirtualFileSystem(self.files)
                 logging.debug(f"Updated {len(self.files)} files in VFS")
-                for file_item in files:
-                    if file_item.get('metadata_mediatype') == 'movie':
-                        path_tail = f"movies/{file_item.get('metadata_rootfoldername')}/{file_item.get('metadata_filename')}"
-                    else:
-                        path_tail = f"series/{file_item.get('metadata_rootfoldername')}/{file_item.get('metadata_foldername')}/{file_item.get('metadata_filename')}"
-                    v_path = f"{MOUNT_PATH}/{path_tail}"
-                    s_path = f"{SYMLINK_PATH}/{path_tail}"
-                    logging.debug(f"Attempting to symlink {v_path} to {s_path}")
-                    create_symlink_in_symlink_path(v_path, s_path)
-
+                if SYMLINK_PATH:
+                    for file_item in files:
+                        if file_item.get('metadata_mediatype') == 'movie':
+                            path_tail = f"movies/{file_item.get('metadata_rootfoldername')}/{file_item.get('metadata_filename')}"
+                        else:
+                            path_tail = f"series/{file_item.get('metadata_rootfoldername')}/{file_item.get('metadata_foldername')}/{file_item.get('metadata_filename')}"
+                        v_path = f"{MOUNT_PATH}/{path_tail}"
+                        s_path = f"{SYMLINK_PATH}/{path_tail}"
+                        logging.debug(f"Attempting to symlink {v_path} to {s_path}")
+                        create_symlink_in_symlink_path(v_path, s_path)
             time.sleep(300)
         
     def getattr(self, path):
