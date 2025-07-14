@@ -132,7 +132,7 @@ class TorBoxMediaCenterFuse(Fuse):
             if files:
                 self.files = files
                 self.vfs = VirtualFileSystem(self.files)
-                logging.debug(f"Updated {len(self.files)} files in VFS")
+                logging.debug(f"Updated {len(self.files)} files in VFS\n{self.files}")
             time.sleep(300)
         
     def getattr(self, path):

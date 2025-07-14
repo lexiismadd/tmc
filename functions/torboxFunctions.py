@@ -119,7 +119,7 @@ def getUserDownloads(type: DownloadType):
                 if data:
                     files.append(data)
                     if data.get('metadata_mediatype') == 'movie':
-                        path_tail = f"movie/{data.get('metadata_rootfoldername')}/{data.get('metadata_filename')}"
+                        path_tail = f"movies/{data.get('metadata_rootfoldername')}/{data.get('metadata_filename')}"
                     else:
                         path_tail = f"series/{data.get('metadata_rootfoldername')}/{data.get('metadata_foldername')}/{data.get('metadata_filename')}"
                         
