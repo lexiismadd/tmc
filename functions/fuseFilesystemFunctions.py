@@ -277,8 +277,20 @@ def create_symlink_in_symlink_path(vfs_path, symlink_path):
     # vfs_path: the path inside the FUSE mount (e.g., /mnt/torbox_media/movies/Foo (2024)/Foo (2024).mkv)
     # symlink_path: the desired symlink location (e.g., /home/youruser/symlinks/Foo (2024).mkv)
     try:
+        path_split = str(symlink_path).split('/')
+        path_split = path_split[:-1]
+        path_split = [p for p in path_split if p]
+        path_joined = ''
+        for folder in path_split:
+            path_joined = f'{path_joined}/{folder}'
+            if os.path.exists(path_joined) == False:
+                logging.debug(f"Creating folder {path_joined}...")
+                os.makedirs(path_joined, exist_ok=True)
+        
         if os.path.exists(symlink_path) or os.path.islink(symlink_path):
+            logging.debug(f"Removing existing symlink {symlink_path}")
             os.remove(symlink_path)
         os.symlink(vfs_path, symlink_path)
+        logging.debug(f"Symlinked {vfs_path} -> {symlink_path}")
     except Exception as e:
         logging.error(f"Error creating symlink: {e}")
