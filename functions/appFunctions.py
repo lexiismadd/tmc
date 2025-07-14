@@ -17,11 +17,11 @@ def initializeFolders():
         os.path.join(MOUNT_PATH, "series"),
     ]
     if SYMLINK_PATH:
-        folders.extend = [
+        folders.extend([
             SYMLINK_PATH,
             os.path.join(SYMLINK_PATH, "movies"),
             os.path.join(SYMLINK_PATH, "series"),
-        ]
+        ])
 
     for folder in folders:
         if os.path.exists(folder):
