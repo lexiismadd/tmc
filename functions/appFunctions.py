@@ -15,8 +15,6 @@ def initializeFolders():
         MOUNT_PATH,
         os.path.join(MOUNT_PATH, "movies"),
         os.path.join(MOUNT_PATH, "series"),
-    ]
-    sym_folders = [
         SYMLINK_PATH,
         os.path.join(SYMLINK_PATH, "movies"),
         os.path.join(SYMLINK_PATH, "series"),
