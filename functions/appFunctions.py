@@ -1,5 +1,5 @@
 from functions.torboxFunctions import getUserDownloads, DownloadType
-from library.filesystem import MOUNT_METHOD, MOUNT_PATH
+from library.filesystem import MOUNT_METHOD, MOUNT_PATH, SYMLINK_PATH
 from library.app import MOUNT_REFRESH_TIME
 from library.torbox import TORBOX_API_KEY
 from functions.databaseFunctions import getAllData, clearDatabase
@@ -16,8 +16,26 @@ def initializeFolders():
         os.path.join(MOUNT_PATH, "movies"),
         os.path.join(MOUNT_PATH, "series"),
     ]
+    sym_folders = [
+        SYMLINK_PATH,
+        os.path.join(SYMLINK_PATH, "movies"),
+        os.path.join(SYMLINK_PATH, "series"),
+    ]
 
     for folder in folders:
+        if os.path.exists(folder):
+            logging.debug(f"Folder {folder} already exists. Deleting...")
+            for item in os.listdir(folder):
+                item_path = os.path.join(folder, item)
+                if os.path.isdir(item_path):
+                    shutil.rmtree(item_path)
+                else:
+                    os.remove(item_path)
+        else:
+            logging.debug(f"Creating folder {folder}...")
+            os.makedirs(folder, exist_ok=True)
+
+    for folder in sym_folders:
         if os.path.exists(folder):
             logging.debug(f"Folder {folder} already exists. Deleting...")
             for item in os.listdir(folder):
@@ -68,6 +86,7 @@ def bootUp():
     logging.debug("Booting up...")
     logging.info("Mount method: %s", MOUNT_METHOD)
     logging.info("Mount path: %s", MOUNT_PATH)
+    logging.info("Symlink Path: %s", SYMLINK_PATH)
     logging.info("TorBox API Key: %s", TORBOX_API_KEY)
     logging.info("Mount refresh time: %s %s", MOUNT_REFRESH_TIME, "hours")
     initializeFolders()
@@ -79,6 +98,9 @@ def getMountMethod():
 
 def getMountPath():
     return MOUNT_PATH
+
+def getSymPath():
+    return SYMLINK_PATH
 
 def getMountRefreshTime():
     return MOUNT_REFRESH_TIME

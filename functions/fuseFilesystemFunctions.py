@@ -1,5 +1,5 @@
 import os
-from library.filesystem import MOUNT_PATH
+from library.filesystem import MOUNT_PATH, SYMLINK_PATH
 import stat
 import errno
 from functions.torboxFunctions import getDownloadLink, downloadFile
@@ -74,9 +74,11 @@ class VirtualFileSystem:
             if f.get('metadata_mediatype') == 'movie':
                 path = f'/movies/{f.get("metadata_rootfoldername")}/{f.get("metadata_filename")}'
                 file_map[path] = f
+                self.create_symlink_in_symlink_path(path,SYMLINK_PATH)
             else:  # series
                 path = f'/series/{f.get("metadata_rootfoldername")}/{f.get("metadata_foldername")}/{f.get("metadata_filename")}'
                 file_map[path] = f
+                self.create_symlink_in_symlink_path(path,SYMLINK_PATH)
                 
         return file_map
 
@@ -91,6 +93,15 @@ class VirtualFileSystem:
         
     def list_dir(self, path):
         return self.structure.get(path, [])
+    
+
+    def create_symlink_in_symlink_path(self, vfs_path, symlink_path):
+        # vfs_path: the path inside the FUSE mount (e.g., /mnt/torbox_media/movies/Foo (2024)/Foo (2024).mkv)
+        # symlink_path: the desired symlink location (e.g., /home/youruser/symlinks/Foo (2024).mkv)
+        if os.path.exists(symlink_path) or os.path.islink(symlink_path):
+            os.remove(symlink_path)
+        os.symlink(vfs_path, symlink_path)
+
     
 class FuseStat(fuse.Stat):
     def __init__(self):

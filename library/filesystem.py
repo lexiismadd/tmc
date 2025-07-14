@@ -13,3 +13,6 @@ assert MOUNT_METHOD in [method.value for method in MountMethods], "MOUNT_METHOD 
 
 MOUNT_PATH = os.getenv("MOUNT_PATH", "./torbox")
 assert MOUNT_PATH, "MOUNT_PATH is not set in .env file"
+
+SYMLINK_PATH = os.getenv("SYMLINK_PATH", "./symlinks")
+assert SYMLINK_PATH, "SYMLINK_PATH is not set in .env file"
