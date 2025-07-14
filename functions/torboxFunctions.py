@@ -118,14 +118,6 @@ def getUserDownloads(type: DownloadType):
                 logging.debug(f"Future result data: {data}")
                 if data:
                     files.append(data)
-                    if data.get('metadata_mediatype') == 'movie':
-                        path_tail = f"movies/{data.get('metadata_rootfoldername')}/{data.get('metadata_filename')}"
-                    else:
-                        path_tail = f"series/{data.get('metadata_rootfoldername')}/{data.get('metadata_foldername')}/{data.get('metadata_filename')}"
-                        
-                    v_path = f"{MOUNT_PATH}/{path_tail}"
-                    s_path = f"{SYMLINK_PATH}/{path_tail}"
-                    create_symlink_in_symlink_path(v_path, s_path)
             except Exception as e:
                 item, file = future_to_file[future]
                 logging.error(f"Error processing file {file.get('short_name', 'unknown')}: {e}")

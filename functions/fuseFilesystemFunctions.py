@@ -132,7 +132,17 @@ class TorBoxMediaCenterFuse(Fuse):
             if files:
                 self.files = files
                 self.vfs = VirtualFileSystem(self.files)
-                logging.debug(f"Updated {len(self.files)} files in VFS\n{self.files}")
+                logging.debug(f"Updated {len(self.files)} files in VFS")
+                for file_item in files:
+                    if file_item.get('metadata_mediatype') == 'movie':
+                        path_tail = f"movies/{file_item.get('metadata_rootfoldername')}/{file_item.get('metadata_filename')}"
+                    else:
+                        path_tail = f"series/{file_item.get('metadata_rootfoldername')}/{file_item.get('metadata_foldername')}/{file_item.get('metadata_filename')}"
+                    v_path = f"{MOUNT_PATH}/{path_tail}"
+                    s_path = f"{SYMLINK_PATH}/{path_tail}"
+                    logging.debug(f"Attempting to symlink {v_path} to {s_path}")
+                    create_symlink_in_symlink_path(v_path, s_path)
+
             time.sleep(300)
         
     def getattr(self, path):
@@ -261,3 +271,14 @@ def unmountFuse():
         logging.error(f"Error unmounting: {e}")
         sys.exit(1)
     logging.info("Unmounted successfully.")
+    
+    
+def create_symlink_in_symlink_path(vfs_path, symlink_path):
+    # vfs_path: the path inside the FUSE mount (e.g., /mnt/torbox_media/movies/Foo (2024)/Foo (2024).mkv)
+    # symlink_path: the desired symlink location (e.g., /home/youruser/symlinks/Foo (2024).mkv)
+    try:
+        if os.path.exists(symlink_path) or os.path.islink(symlink_path):
+            os.remove(symlink_path)
+        os.symlink(vfs_path, symlink_path)
+    except Exception as e:
+        logging.error(f"Error creating symlink: {e}")
