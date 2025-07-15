@@ -10,6 +10,7 @@ class MountMethods(Enum):
 
 class SymlinkCreation(Enum):
     once = "once"
+    spawn = "spawn"
     always = "always"
 
 MOUNT_METHOD = os.getenv("MOUNT_METHOD", MountMethods.strm.value)

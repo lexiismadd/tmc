@@ -94,7 +94,7 @@ To run this project you will need to add the following environment variables to 
 
 `SYMLINK_PATH` The path where symlinks to your files should be created if using `MOUNT_METHOD` of `fuse`. If inside of Docker, this path needs to be accessible to other applications. If running locally without Docker, this path must be owned. Setting is optional, omit to skip symlink creation.
 
-`SYMLINK_CREATION` When the symlinks should be created. Must be either `once` or `always`. `always` will create them each time the mount is refreshed, `once` will create them only the first time the file is created in the mount path after app startup. The default is `always` and is optional.
+`SYMLINK_CREATION` When the symlinks should be created. Must be either `once`, `spawn` or `always`. `always` will create them each time the mount is refreshed, `spawn` will create them once per session or the first time the file is created in the mount path after the app starts, `once` will create them one-time only. The default is `always` and is optional.
 
 
 ## 🐳 Running on Docker with one command (recommended)
