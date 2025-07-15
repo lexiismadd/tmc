@@ -1,5 +1,5 @@
 from functions.torboxFunctions import getUserDownloads, DownloadType
-from library.filesystem import MOUNT_METHOD, MOUNT_PATH, SYMLINK_PATH
+from library.filesystem import MOUNT_METHOD, MOUNT_PATH, SYMLINK_PATH, SYMLINK_CREATION
 from library.app import MOUNT_REFRESH_TIME
 from library.torbox import TORBOX_API_KEY
 from functions.databaseFunctions import getAllData, clearDatabase
@@ -82,6 +82,7 @@ def bootUp():
     logging.info("Mount method: %s", MOUNT_METHOD)
     logging.info("Mount path: %s", MOUNT_PATH)
     logging.info("Symlink Path: %s", SYMLINK_PATH)
+    logging.info("Symlink Method: %s", SYMLINK_CREATION)
     logging.info("TorBox API Key: %s", TORBOX_API_KEY)
     logging.info("Mount refresh time: %s %s", MOUNT_REFRESH_TIME, "hours")
     initializeFolders()
@@ -96,6 +97,9 @@ def getMountPath():
 
 def getSymPath():
     return SYMLINK_PATH
+
+def getSymCreation():
+    return SYMLINK_CREATION
 
 def getMountRefreshTime():
     return MOUNT_REFRESH_TIME
