@@ -4,6 +4,7 @@ from functions.appFunctions import bootUp, getMountMethod, getAllUserDownloadsFr
 from functions.databaseFunctions import closeAllDatabases
 import logging
 from sys import platform
+import os
 
 logging.basicConfig(
     level=logging.INFO,

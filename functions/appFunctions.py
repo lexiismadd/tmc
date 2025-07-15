@@ -82,9 +82,14 @@ def bootUp():
     logging.info("Mount method: %s", MOUNT_METHOD)
     logging.info("Mount path: %s", MOUNT_PATH)
     logging.info("Symlink Path: %s", SYMLINK_PATH)
-    logging.info("Symlink Method: %s", SYMLINK_CREATION)
+    logging.info("Symlink Creation Method: %s", SYMLINK_CREATION)
     logging.info("TorBox API Key: %s", TORBOX_API_KEY)
     logging.info("Mount refresh time: %s %s", MOUNT_REFRESH_TIME, "hours")
+    if SYMLINK_CREATION != 'once':
+        try:
+            os.remove(f"{os.curdir}/symlinks.json")
+        except Exception as e:
+            logging.debug("symlinks database not yet created")
     initializeFolders()
 
     return True
