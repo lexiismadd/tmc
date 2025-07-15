@@ -17,11 +17,11 @@ def initializeFolders():
         os.path.join(MOUNT_PATH, "series"),
     ]
     if SYMLINK_PATH:
-        folders.extend([
+        symfolders = [
             SYMLINK_PATH,
             os.path.join(SYMLINK_PATH, "movies"),
             os.path.join(SYMLINK_PATH, "series"),
-        ])
+        ]
 
     for folder in folders:
         if os.path.exists(folder):
@@ -32,6 +32,13 @@ def initializeFolders():
                     shutil.rmtree(item_path)
                 else:
                     os.remove(item_path)
+        else:
+            logging.debug(f"Creating folder {folder}...")
+            os.makedirs(folder, exist_ok=True)
+
+    for folder in symfolders:
+        if os.path.exists(folder):
+            logging.debug(f"Folder {folder} already exists...")
         else:
             logging.debug(f"Creating folder {folder}...")
             os.makedirs(folder, exist_ok=True)
