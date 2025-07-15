@@ -1,5 +1,5 @@
 import os
-from library.filesystem import MOUNT_PATH, SYMLINK_PATH
+from library.filesystem import MOUNT_PATH, SYMLINK_PATH, SYMLINK_CREATION
 import stat
 import errno
 from functions.torboxFunctions import getDownloadLink, downloadFile
@@ -7,6 +7,7 @@ import time
 import sys
 import logging
 from functions.appFunctions import getAllUserDownloads
+from functions.databaseFunctions import insertData, getAllData
 import threading
 from sys import platform
 
@@ -132,15 +133,28 @@ class TorBoxMediaCenterFuse(Fuse):
                 self.vfs = VirtualFileSystem(self.files)
                 logging.debug(f"Updated {len(self.files)} files in VFS")
                 if SYMLINK_PATH:
+                    try:
+                        get_symlink_data = getAllData('symlinks')
+                    except:
+                        get_symlink_data = []
+                    
                     for file_item in files:
+                        symlink_record = file_item
                         if file_item.get('metadata_mediatype') == 'movie':
                             path_tail = f"movies/{file_item.get('metadata_rootfoldername')}/{file_item.get('metadata_filename')}"
                         else:
                             path_tail = f"series/{file_item.get('metadata_rootfoldername')}/{file_item.get('metadata_foldername')}/{file_item.get('metadata_filename')}"
                         v_path = f"{MOUNT_PATH}/{path_tail}"
                         s_path = f"{SYMLINK_PATH}/{path_tail}"
-                        logging.debug(f"Attempting to symlink {v_path} to {s_path}")
-                        create_symlink_in_symlink_path(v_path, s_path)
+                        symlink_record['real_path'] = v_path
+                        symlink_record['symlink_path'] = s_path
+                        if symlink_record not in get_symlink_data or SYMLINK_CREATION == 'always':
+                            logging.debug(f"Attempting to symlink {v_path} to {s_path}")
+                            create_symlink_in_symlink_path(v_path, s_path)
+                            insertData(symlink_record,'symlinks')
+                        else:
+                            logging.debug(f"Symlink created previously and creation set to 'once'. Skipping")
+                            
             time.sleep(300)
         
     def getattr(self, path):
