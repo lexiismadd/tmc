@@ -157,7 +157,7 @@ class TorBoxMediaCenterFuse(Fuse):
                             create_symlink_in_symlink_path(v_path, s_path)
                             insertData(symlink_record,'symlinks')
                         else:
-                            logging.debug(f"Symlink {s_path} created previously and creation set to 'once'. Skipping")
+                            logging.debug(f"Symlink {s_path} created previously and creation set to '{SYMLINK_CREATION}'. Skipping")
                             
             time.sleep(300)
         
