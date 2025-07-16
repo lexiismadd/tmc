@@ -160,25 +160,25 @@ class TorBoxMediaCenterFuse(Fuse):
                         else:
                             logging.debug(f"Symlink {s_path} created previously and creation set to '{SYMLINK_CREATION}'. Skipping")
                             
-            deleted_files = list(set(prev_files) - set(files))
-            if deleted_files and SYMLINK_PATH:
-                for file_item in deleted_files:
-                    symlink_record = file_item
-                    if file_item.get('metadata_mediatype') == 'movie':
-                        s_path = f"{SYMLINK_PATH}/movies/{file_item.get('metadata_rootfoldername')}/{file_item.get('metadata_filename')}"
-                    else:
-                        s_path = f"{SYMLINK_PATH}/series/{file_item.get('metadata_rootfoldername')}/{file_item.get('metadata_foldername')}/{file_item.get('metadata_filename')}"
-                    symlink_record['symlink_path'] = s_path
-                    deleteData(symlink_record,'symlinks')
-                    if os.path.islink(s_path):
-                        try:
-                            os.unlink(s_path)
-                            logging.debug(f"Removed symlink {s_path}")
-                        except Exception as e:
-                            logging.error(f"Cannot remove symlink {s_path}: {e}")
-                            pass
-                    else:
-                        logging.debug(f"Symlink {s_path} does not exist")
+                deleted_files = list(set(prev_files) - set(files))
+                if deleted_files and SYMLINK_PATH:
+                    for file_item in deleted_files:
+                        symlink_record = file_item
+                        if file_item.get('metadata_mediatype') == 'movie':
+                            s_path = f"{SYMLINK_PATH}/movies/{file_item.get('metadata_rootfoldername')}/{file_item.get('metadata_filename')}"
+                        else:
+                            s_path = f"{SYMLINK_PATH}/series/{file_item.get('metadata_rootfoldername')}/{file_item.get('metadata_foldername')}/{file_item.get('metadata_filename')}"
+                        symlink_record['symlink_path'] = s_path
+                        deleteData(symlink_record,'symlinks')
+                        if os.path.islink(s_path):
+                            try:
+                                os.unlink(s_path)
+                                logging.debug(f"Removed symlink {s_path}")
+                            except Exception as e:
+                                logging.error(f"Cannot remove symlink {s_path}: {e}")
+                                pass
+                        else:
+                            logging.debug(f"Symlink {s_path} does not exist")
 
             prev_files = files
             time.sleep(300)
