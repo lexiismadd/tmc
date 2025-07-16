@@ -181,6 +181,7 @@ class TorBoxMediaCenterFuse(Fuse):
                             logging.debug(f"Symlink {s_path} does not exist")
 
             prev_files = files
+            logging.debug(f"Waiting 5mins before querying Torbox again for changes")
             time.sleep(300)
         
     def getattr(self, path):
