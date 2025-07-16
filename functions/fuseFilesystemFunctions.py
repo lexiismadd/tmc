@@ -152,7 +152,7 @@ class TorBoxMediaCenterFuse(Fuse):
                             exists = any(d.get("symlink_path",None) == s_path for d in get_symlink_data)
                         else:
                             exists = False
-                        if not exists or SYMLINK_CREATION == 'always':
+                        if exists == False or SYMLINK_CREATION == 'always':
                             logging.debug(f"Attempting to symlink {v_path} to {s_path}")
                             create_symlink_in_symlink_path(v_path, s_path)
                             insertData(symlink_record,'symlinks')
