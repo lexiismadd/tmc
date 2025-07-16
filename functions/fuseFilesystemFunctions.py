@@ -132,7 +132,7 @@ class TorBoxMediaCenterFuse(Fuse):
             if files:
                 self.files = files
                 self.vfs = VirtualFileSystem(self.files)
-                logging.debug(f"Updated {len(self.files)} files in VFS")
+                logging.info(f"Updated {len(self.files)} files in VFS")
                 if SYMLINK_PATH:
                     try:
                         get_symlink_data = getAllData('symlinks')[0]
@@ -160,6 +160,7 @@ class TorBoxMediaCenterFuse(Fuse):
                         else:
                             logging.debug(f"Symlink {s_path} created previously and creation set to '{SYMLINK_CREATION}'. Skipping")
                             
+                    logging.info(f"Updated {len(files)} symlinks")
                 deleted_files = list({doc.get('item_id') for doc in prev_files} - {doc.get('item_id') for doc in files})
                 if deleted_files and SYMLINK_PATH:
                     for file_item in deleted_files:
@@ -179,6 +180,7 @@ class TorBoxMediaCenterFuse(Fuse):
                                 pass
                         else:
                             logging.debug(f"Symlink {s_path} does not exist")
+                    logging.info(f"Removed {len(deleted_files)} broken or dead symlinks")
 
             prev_files = files
             logging.debug(f"Waiting 5mins before querying Torbox again for changes")
