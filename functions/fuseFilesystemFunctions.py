@@ -137,7 +137,7 @@ class TorBoxMediaCenterFuse(Fuse):
                         get_symlink_data = getAllData('symlinks')
                     except:
                         get_symlink_data = []
-                    
+                    logging.debug(f"Symlink db:\n{get_symlink_data}")
                     for file_item in files:
                         symlink_record = file_item
                         if file_item.get('metadata_mediatype') == 'movie':
