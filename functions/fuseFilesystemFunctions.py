@@ -160,7 +160,7 @@ class TorBoxMediaCenterFuse(Fuse):
                         else:
                             logging.debug(f"Symlink {s_path} created previously and creation set to '{SYMLINK_CREATION}'. Skipping")
                             
-                deleted_files = list(set(prev_files) - set(files))
+                deleted_files = list({doc.get('item_id') for doc in prev_files} - {doc.get('item_id') for doc in files})
                 if deleted_files and SYMLINK_PATH:
                     for file_item in deleted_files:
                         symlink_record = file_item
