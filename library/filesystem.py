@@ -7,6 +7,7 @@ load_dotenv()
 class MountMethods(Enum):
     strm = "strm"
     fuse = "fuse"
+    download = "download"
 
 class SymlinkCreation(Enum):
     once = "once"
@@ -19,7 +20,8 @@ assert MOUNT_METHOD in [method.value for method in MountMethods], "MOUNT_METHOD 
 MOUNT_PATH = os.getenv("MOUNT_PATH", "./torbox")
 assert MOUNT_PATH, "MOUNT_PATH is not set in .env file"
 
-SYMLINK_PATH = os.getenv("SYMLINK_PATH", None)
-
-SYMLINK_CREATION = os.getenv("SYMLINK_CREATION", "always")
+SYMLINK_CREATION = os.getenv("SYMLINK_CREATION", "off")
 assert SYMLINK_CREATION in [symlink.value for symlink in SymlinkCreation], "SYMLINK_CREATION is not set correctly in .env file"
+
+SYMLINK_PATH = os.getenv("SYMLINK_PATH", None)
+if SYMLINK_CREATION != 'off': assert SYMLINK_PATH, f"SYMLINK_PATH is not set in .env file, however SYMLINK_CREATION is {SYMLINK_CREATION}"
