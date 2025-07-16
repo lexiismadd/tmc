@@ -134,10 +134,10 @@ class TorBoxMediaCenterFuse(Fuse):
                 logging.debug(f"Updated {len(self.files)} files in VFS")
                 if SYMLINK_PATH:
                     try:
-                        get_symlink_data = getAllData('symlinks')
+                        get_symlink_data = getAllData('symlinks')[0]
                     except:
                         get_symlink_data = []
-                    logging.debug(f"Symlink db:\n{get_symlink_data}")
+                    # logging.debug(f"Symlink db:\n{get_symlink_data}")
                     for file_item in files:
                         symlink_record = file_item
                         if file_item.get('metadata_mediatype') == 'movie':
